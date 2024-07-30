@@ -10,7 +10,6 @@ root.render(
     <Router>
       <Routes>
         <Route path="/" element={<App />} />
-        <Route path="/view" element={<View />} />
       </Routes>
     </Router>
   </React.StrictMode>

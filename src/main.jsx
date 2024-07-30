@@ -1,8 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import App from './App';
-import View from './View';
 import Registration from './Registration';
 import './index.css';
 import '@fontsource/poppins'; // Default weight (400)
@@ -13,8 +11,6 @@ ReactDOM.createRoot(document.getElementById('root')).render(
     <Router>
       <Routes>
         <Route path="/" element={<Registration />} />
-        <Route path="/home" element={<App />} />
-        <Route path="/view" element={<View />} />
       </Routes>
     </Router>
   </React.StrictMode>
