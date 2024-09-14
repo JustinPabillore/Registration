@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import QRCode from 'qrcode.react';
+import DOMPurify from 'dompurify';
 import './Registration.css';
 
 function Registration() {
@@ -21,6 +22,7 @@ function Registration() {
 
   const [showQRCode, setShowQRCode] = useState(false);
   const [countdown, setCountdown] = useState(0);
+  const [errorMessage, setErrorMessage] = useState(''); // New state for error message
 
   const capitalizeFirstWord = (value) => {
     if (!value) return '';
@@ -31,15 +33,23 @@ function Registration() {
   const handleInputChange = (field, value) => {
     let capitalizedValue = value;
 
-    if (field === 'firstName') {
+    // Basic input validation: Disallow numbers or special characters in names
+    const namePattern = /^[A-Za-z\s]*$/; // Only allow letters and spaces for names
+    if (['firstName', 'middleName', 'lastName'].includes(field) && !namePattern.test(value)) {
+      setErrorMessage('Please enter valid alphabetic characters only.');
+      return;
+    }
+
+    // Capitalization rules
+    if (field === 'firstName' || field === 'middleName' || field === 'lastName') {
       capitalizedValue = capitalizeFirstWord(value);
-    } else if (field === 'address' || field === 'purpose'  || field === 'middleName' || field === 'lastName') {
-      // Capitalize only if the first character is not already uppercase
+    } else if (field === 'address' || field === 'purpose') {
       if (value.length > 0 && value[0] === value[0].toLowerCase()) {
         capitalizedValue = value.charAt(0).toUpperCase() + value.slice(1);
       }
     }
 
+    setErrorMessage(''); // Clear error message when input is valid
     setFormData({
       ...formData,
       [field]: capitalizedValue,
@@ -49,27 +59,47 @@ function Registration() {
   const handleFormSubmit = (event) => {
     event.preventDefault();
 
-    // Check if all required fields are filled
+    // Sanitize all fields before using them
+    const sanitizedData = {
+      firstName: DOMPurify.sanitize(formData.firstName),
+      middleName: DOMPurify.sanitize(formData.middleName),
+      lastName: DOMPurify.sanitize(formData.lastName),
+      address: DOMPurify.sanitize(formData.address),
+      purpose: DOMPurify.sanitize(formData.purpose),
+    };
+
+    // Check if all required fields are filled and valid
     if (
-      formData.firstName.trim() === '' ||
-      formData.lastName.trim() === '' ||
-      formData.address.trim() === '' ||
-      formData.purpose.trim() === ''
+      sanitizedData.firstName.trim() === '' ||
+      sanitizedData.lastName.trim() === '' ||
+      sanitizedData.address.trim() === '' ||
+      sanitizedData.purpose.trim() === ''
     ) {
-      alert('Please fill out all required fields.');
+      setErrorMessage('Please fill out all required fields.');
+      return;
+    }
+
+    // Ensure length and content checks (for address/purpose)
+    if (sanitizedData.address.length < 5) {
+      setErrorMessage('Address must be at least 5 characters.');
+      return;
+    }
+
+    if (sanitizedData.purpose.length < 3) {
+      setErrorMessage('Purpose must be at least 3 characters.');
       return;
     }
 
     // Capitalize each part of the submitted data
     const capitalizedData = {
-      firstName: capitalizeFirstWord(formData.firstName),
-      middleName: formData.middleName ? capitalizeFirstWord(formData.middleName) : '',
-      lastName: capitalizeFirstWord(formData.lastName),
-      address: capitalizeFirstWord(formData.address),
-      purpose: capitalizeFirstWord(formData.purpose),
+      firstName: capitalizeFirstWord(sanitizedData.firstName),
+      middleName: sanitizedData.middleName ? capitalizeFirstWord(sanitizedData.middleName) : '',
+      lastName: capitalizeFirstWord(sanitizedData.lastName),
+      address: capitalizeFirstWord(sanitizedData.address),
+      purpose: capitalizeFirstWord(sanitizedData.purpose),
     };
 
-    // Store the submitted data
+    // Store the sanitized and capitalized data
     setSubmittedData(capitalizedData);
 
     setShowQRCode(true);
@@ -83,6 +113,8 @@ function Registration() {
       address: '',
       purpose: '',
     });
+
+    setErrorMessage(''); // Clear error after successful submission
   };
 
   useEffect(() => {
@@ -151,6 +183,9 @@ function Registration() {
                 onChange={(e) => handleInputChange('purpose', e.target.value)}
                 required // Required attribute
               />
+
+              {errorMessage && <div className="error-message">{errorMessage}</div>} {/* Error message */}
+
               <button type="submit" className="r-submit-button">
                 Submit
               </button>

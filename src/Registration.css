@@ -166,3 +166,8 @@ body, html {
   margin-top: auto;
   letter-spacing: 2px;
 }
+
+.error-message {
+  color: red;
+  margin-top: 10px;
+}
