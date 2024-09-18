@@ -22,7 +22,7 @@ function Registration() {
 
   const [showQRCode, setShowQRCode] = useState(false);
   const [countdown, setCountdown] = useState(0);
-  const [errorMessage, setErrorMessage] = useState(''); // New state for error message
+  const [errorMessage, setErrorMessage] = useState('');
 
   const capitalizeFirstWord = (value) => {
     if (!value) return '';
@@ -34,32 +34,32 @@ function Registration() {
     let capitalizedValue = value;
 
     // Basic input validation: Disallow numbers or special characters in names
-    const namePattern = /^[A-Za-z\s]*$/; // Only allow letters and spaces for names
+    const namePattern = /^[A-Za-z\s]*$/;
     if (['firstName', 'middleName', 'lastName'].includes(field) && !namePattern.test(value)) {
       setErrorMessage('Please enter valid alphabetic characters only.');
       return;
     }
 
     // Capitalization rules
-    if (field === 'firstName' || field === 'middleName' || field === 'lastName') {
+    if (['firstName', 'middleName', 'lastName'].includes(field)) {
       capitalizedValue = capitalizeFirstWord(value);
-    } else if (field === 'address' || field === 'purpose') {
+    } else if (['address', 'purpose'].includes(field)) {
       if (value.length > 0 && value[0] === value[0].toLowerCase()) {
         capitalizedValue = value.charAt(0).toUpperCase() + value.slice(1);
       }
     }
 
-    setErrorMessage(''); // Clear error message when input is valid
+    setErrorMessage('');
     setFormData({
       ...formData,
       [field]: capitalizedValue,
     });
   };
 
-  const handleFormSubmit = (event) => {
+  const handleFormSubmit = async (event) => {
     event.preventDefault();
 
-    // Sanitize all fields before using them
+    // Sanitize inputs using DOMPurify
     const sanitizedData = {
       firstName: DOMPurify.sanitize(formData.firstName),
       middleName: DOMPurify.sanitize(formData.middleName),
@@ -68,7 +68,7 @@ function Registration() {
       purpose: DOMPurify.sanitize(formData.purpose),
     };
 
-    // Check if all required fields are filled and valid
+    // Check if all required fields are filled
     if (
       sanitizedData.firstName.trim() === '' ||
       sanitizedData.lastName.trim() === '' ||
@@ -79,7 +79,7 @@ function Registration() {
       return;
     }
 
-    // Ensure length and content checks (for address/purpose)
+    // Additional validations
     if (sanitizedData.address.length < 5) {
       setErrorMessage('Address must be at least 5 characters.');
       return;
@@ -90,31 +90,43 @@ function Registration() {
       return;
     }
 
-    // Capitalize each part of the submitted data
-    const capitalizedData = {
-      firstName: capitalizeFirstWord(sanitizedData.firstName),
-      middleName: sanitizedData.middleName ? capitalizeFirstWord(sanitizedData.middleName) : '',
-      lastName: capitalizeFirstWord(sanitizedData.lastName),
-      address: capitalizeFirstWord(sanitizedData.address),
-      purpose: capitalizeFirstWord(sanitizedData.purpose),
-    };
+    // Log the data being sent for debugging
+    console.log('Sending data:', sanitizedData);
 
-    // Store the sanitized and capitalized data
-    setSubmittedData(capitalizedData);
+    try {
+      const response = await fetch('http://localhost:8000/api/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(sanitizedData),
+      });
 
-    setShowQRCode(true);
-    setCountdown(30); // Start the countdown from 30 seconds
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
 
-    // Clear form data after submission
-    setFormData({
-      firstName: '',
-      middleName: '',
-      lastName: '',
-      address: '',
-      purpose: '',
-    });
+      const result = await response.json();
 
-    setErrorMessage(''); // Clear error after successful submission
+      if (result.success) {
+        setSubmittedData(sanitizedData);
+        setShowQRCode(true);
+        setCountdown(30);
+        setFormData({
+          firstName: '',
+          middleName: '',
+          lastName: '',
+          address: '',
+          purpose: '',
+        });
+        setErrorMessage('');
+      } else {
+        setErrorMessage(result.error || 'An error occurred while submitting the form.');
+      }
+    } catch (error) {
+      setErrorMessage('An error occurred while submitting the form.');
+      console.error('Submit error:', error);
+    }
   };
 
   useEffect(() => {
@@ -150,7 +162,7 @@ function Registration() {
                 placeholder="First Name"
                 value={formData.firstName}
                 onChange={(e) => handleInputChange('firstName', e.target.value)}
-                required // Required attribute
+                required
               />
               <input
                 type="text"
@@ -165,7 +177,7 @@ function Registration() {
                 placeholder="Last Name"
                 value={formData.lastName}
                 onChange={(e) => handleInputChange('lastName', e.target.value)}
-                required // Required attribute
+                required
               />
               <input
                 type="text"
@@ -173,7 +185,7 @@ function Registration() {
                 placeholder="Address"
                 value={formData.address}
                 onChange={(e) => handleInputChange('address', e.target.value)}
-                required // Required attribute
+                required
               />
               <input
                 type="text"
@@ -181,10 +193,10 @@ function Registration() {
                 placeholder="Purpose"
                 value={formData.purpose}
                 onChange={(e) => handleInputChange('purpose', e.target.value)}
-                required // Required attribute
+                required
               />
 
-              {errorMessage && <div className="error-message">{errorMessage}</div>} {/* Error message */}
+              {errorMessage && <div className="error-message">{errorMessage}</div>}
 
               <button type="submit" className="r-submit-button">
                 Submit
@@ -198,7 +210,7 @@ function Registration() {
             {showQRCode && (
               <>
                 <QRCode
-                  value={`${submittedData.firstName} ${submittedData.middleName} ${submittedData.lastName}`}
+                  value={`${submittedData.firstName} ${submittedData.lastName} Visitor`}
                   size={250}
                 />
                 <div className="notice">
@@ -218,4 +230,3 @@ function Registration() {
 }
 
 export default Registration;
-  

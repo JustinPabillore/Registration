@@ -28,9 +28,9 @@ body, html {
 
 .main-title {
   color: #FCB315;
-  font-size: 2.5rem; /* Use rem for scalable text */
+  font-size: 45px;
   font-weight: bold;
-  letter-spacing: 0.3rem; /* Adjust letter spacing */
+  letter-spacing: 5px;
   font-family: 'Poppins', sans-serif;
 }
 
@@ -45,8 +45,8 @@ body, html {
 
 .mid1-text {
   color: #FCB315;
-  font-size: 1rem; /* Scalable text */
-  letter-spacing: 0.3rem;
+  font-size: 17px;
+  letter-spacing: 5px;
   font-weight: 900;
   text-align: center;
   font-family: 'Poppins', sans-serif;
@@ -56,20 +56,26 @@ body, html {
   display: flex;
   width: 100%;
   height: calc(100vh - 130px);
-  justify-content: center; /* Center the containers */
-  align-items: flex-start; /* Align containers at the top */
+  justify-content: space-between;
   box-sizing: border-box;
-  gap: 10px; /* Add a small gap between containers */
 }
 
 .left-container,
 .right-container {
-  width: 50%; /* Reduced width to accommodate the gap */
+  width: 675px;
   height: 100%;
   background-color: white;
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.bottom-container .left-container {
+  margin-left: -5px;
+}
+
+.bottom-container .right-container {
+  margin-right: -5px;
 }
 
 .m-box {
@@ -84,7 +90,7 @@ body, html {
 }
 
 .m-box-title {
-  font-size: 1.8rem;
+  font-size: 30px;
   font-weight: bold;
   margin-bottom: 20px;
   color: #1A1851;
@@ -108,7 +114,7 @@ body, html {
   background-color: #FCB315;
   color: black;
   text-align: center;
-  font-size: 1.25rem;
+  font-size: 20px;
   font-weight: bold;
   font-family: 'Poppins', sans-serif;
 }
@@ -132,7 +138,7 @@ body, html {
 }
 
 .l-box-title {
-  font-size: 1.8rem;
+  font-size: 30px;
   font-weight: bold;
   margin-bottom: 20px;
   color: #1A1851;
@@ -156,7 +162,7 @@ body, html {
   text-align: center;
   color: #f50d0d;
   font-weight: bold;
-  font-size: 1.25rem;
+  font-size: 20px;
   margin-top: auto;
   letter-spacing: 2px;
 }
@@ -164,29 +170,4 @@ body, html {
 .error-message {
   color: red;
   margin-top: 10px;
-}
-
-/* Media Query for small screens */
-@media screen and (max-width: 768px) {
-  .left-container,
-  .right-container {
-    width: 100%; /* Take full width on smaller screens */
-    margin: 0;
-  }
-
-  .main-title {
-    font-size: 2rem; /* Adjust font size for smaller screens */
-  }
-
-  .m-box-title, .l-box-title {
-    font-size: 1.5rem;
-  }
-
-  .input-fields {
-    font-size: 1rem; /* Adjust font size */
-  }
-
-  .r-submit-button {
-    font-size: 1rem;
-  }
 }
